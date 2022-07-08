@@ -68,7 +68,6 @@ function ready(error, topo) {
     }
 
     let mouseClick = function(d) {
-        console.log(d.properties.id)
         tooltip
             .style("opacity", 0.7)
     }

@@ -1,0 +1,43 @@
+#pieChart {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    width: 400px;
+    height: 400px;
+}
+
+#barChart {
+    position: absolute;
+    top: 160px;
+    left: 410px;
+    height: 250px;
+}
+
+.slice {
+    font-size: 12pt;
+    font-family: Verdana;
+    fill: white;
+    font-weight: bold;
+}
+
+.axis text {
+    font-family: Verdana;
+    font-size: 11px;
+}
+
+.title {
+    font-family: Verdana;
+    font-size: 20px;
+}
+
+.xAxis {
+    font-family: verdana;
+    font-size: 11px;
+    fill: black;
+}
+
+.yAxis {
+    font-family: verdana;
+    font-size: 11px;
+    fill: white;
+}

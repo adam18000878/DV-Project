@@ -1,43 +1,17 @@
-#pieChart {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    width: 400px;
-    height: 400px;
+#svg {
+    align-self: auto;
+    width: 700;
+    width: 280;
+    display: block;
+    margin: auto;
 }
 
-#barChart {
-    position: absolute;
-    top: 160px;
-    left: 410px;
-    height: 250px;
+.mainViz {
+    background-color: none;
+    width: auto;
+    height: 100%;
 }
 
-.slice {
-    font-size: 12pt;
-    font-family: Verdana;
-    fill: white;
-    font-weight: bold;
-}
-
-.axis text {
-    font-family: Verdana;
-    font-size: 11px;
-}
-
-.title {
-    font-family: Verdana;
-    font-size: 20px;
-}
-
-.xAxis {
-    font-family: verdana;
-    font-size: 11px;
-    fill: black;
-}
-
-.yAxis {
-    font-family: verdana;
-    font-size: 11px;
-    fill: white;
+.centerGraphs {
+    align-items: center;
 }

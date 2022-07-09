@@ -5,18 +5,25 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://d3js.org/d3.v4.js"></script>
+    <script src="https://d3js.org/d3.v5.js"></script>
     <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
     <script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
     <title>Dashboard</title>
-    <style type="text/css" src="css/style.css"></style>
+    <link rel="stylesheet" href="css/style.css" />
 </head>
 
 <body>
-    <div id="choroplethChart"><svg id="my_dataviz" width="700" height="280" style="background-color:#1d6a8d;"></svg></div>
-    <div id="lineChart"></div>
-    <div id="scatterChart"></div>
+    <div id="MainViz" class="mainViz" width="1000">
+        <div>
+            <svg id="choroplethChart" width="700" height="280" style="background-color:#2f82a8c9;display: block; margin: auto;"></svg>
+        </div>
+        <div id="dtip">
+            <svg id="lineChart" width="500" height="400" style="float:left"></svg>
+            <svg id="scatterChart" width="500" height="400" style="float:right"></svg>
+        </div>
+    </div>
     <script type="text/javascript" src="js/dashboard.js"></script>
 </body>
 
 </html>
+<!-- width="700" height="280" -->

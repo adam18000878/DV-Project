@@ -14,4 +14,22 @@
 
 .centerGraphs {
     align-items: center;
+    display: block; 
+    margin: auto;
+}
+
+.choroplethChart {
+    background-color:#2f82a8c9;
+}
+
+.pieChart {
+    background-color:#3b1a79c9;
+}
+
+.lineChart {
+    float:left;
+}
+
+.scatterChart {
+    float:right;
 }

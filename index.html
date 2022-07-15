@@ -13,17 +13,15 @@
 </head>
 
 <body>
-    <div id="MainViz" class="mainViz" width="1000">
-        <div>
-            <svg id="choroplethChart" width="700" height="280" style="background-color:#2f82a8c9;display: block; margin: auto;"></svg>
-        </div>
+    <div id="MainViz" class="mainViz" width="100%">
+        <svg id="choroplethChart" class="choroplethChart" width="700" height="280"></svg>
+        <svg id="pieChart" class="pieChart" width="400" height="400"></svg>
         <div id="dtip">
-            <svg id="lineChart" width="500" height="400" style="float:left"></svg>
-            <svg id="scatterChart" width="500" height="400" style="float:right"></svg>
+            <svg id="lineChart" width="500" height="400" class="lineChart"></svg>
+            <svg id="scatterChart" width="500" height="400" class="scatterChart"></svg>
         </div>
     </div>
     <script type="text/javascript" src="js/dashboard.js"></script>
 </body>
 
 </html>
-<!-- width="700" height="280" -->

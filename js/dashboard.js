@@ -5,9 +5,9 @@ var parseDate = d3.timeParse("%Y-%m");
 var formatDate = d3.timeFormat("%Y-%m");
 var dates = []
 var datas = []
-const colorRange = ["#F44236", '#EA1E63', '#9C28B1', '#673AB7', '#009788', '#00BCD5', '#03A9F5', '#2196F3', '#3F51B5', '#4CB050', '#8BC24A', '#CDDC39', '#FFEB3C', '#FEC107', '#FE5721']
+const colorRange = ["#F44236", '#EA1E63', '#9C28B1', '#673AB7', '#009788', '#00BCD5', '#03A9F5', '#2196F3', '#3F51B5', '#4CB050', '#8BC24A', '#CDDC39', '#FFEB3C', '#FEC107', '#FE5721','red']
     // const stateCode = ['slg', 'kl', 'jhr', 'sbh', 'srw', 'ngs', 'png', 'kel', 'prk', 'kdh', 'mlk', 'phg', 'tg', 'pj', 'pls']
-const stateCode = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+const stateCode = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
 var colorScale = d3.scaleThreshold()
     .domain(stateCode)
     .range(colorRange);
@@ -42,6 +42,7 @@ Promise.all([
             d[i].Date = formatDate(parseDate(d[i].Date));
     })
 ]).then(function(loadData) {
+    console.log(loadData[0])
     createChoropleth(loadData[0])
     createLineDeath()
     createLineVaccine()
@@ -55,9 +56,8 @@ function createChoropleth(topo) {
         height = +svg.attr("height");
     var projection = d3.geoMercator()
         .scale(2100) // adjust size map
-        .center([121.5, -2])
+        .center([122, -2])
         .translate([width, height]);
-    var path = d3.geoPath().projection(projection);
 
 
     var tooltip = d3.select("div")
@@ -116,20 +116,18 @@ function createChoropleth(topo) {
         let lineData = []
 
         for (i in datas) {
-            if (datas[i].State == d.properties.name){
+            if (datas[i].id == d.properties.cartodb_id){
                 lineData.push({
                     Date:parseDate(datas[i].Date),
                     Death:datas[i]['Total Death'],
                     Vaccine:datas[i]['Total Vaccination']
                 })
             }
-            console.log(datas[i].State)
         }
-        console.log(datas[i].State)
-        console.log(d.properties.name)
 
         updateLineDeath(lineData,d.properties.name,colorScale(d.total))
         updateLineVaccine(lineData,d.properties.name,colorScale(d.total))
+        updateScatter(lineData,d.properties.name,colorScale(d.total))
     }
 
 
@@ -201,7 +199,7 @@ function createLineDeath() {
         .append("circle")
         .attr("cx", function(d) { return x(d.Date); })
         .attr("cy", function(d) { return y(+d.Death); })
-        .attr("r", 2)
+        .attr("r", 5)
         .style("fill", "black")
         .on("mouseover", mouseOverDeath)
         .on("mouseleave", mouseLeave);
@@ -277,7 +275,7 @@ function updateLineDeath(lineData, country, color){
         .data(lineData)
         .transition()
         .duration(750)
-        .attr('fill', 'none')
+        .style('fill', color)
         .attr("cy", function(d) { return y(+d.Death); })
 
 }
@@ -328,7 +326,7 @@ function createLineVaccine() {
         .append("circle")
         .attr("cx", function(d) { return x(d.Date); })
         .attr("cy", function(d) { return y(+d.Vaccine); })
-        .attr("r", 2)
+        .attr("r", 5)
         .style("fill", "blue")
         .on("mouseover", mouseOverVacc)
         .on("mouseleave", mouseLeave);
@@ -401,9 +399,8 @@ function updateLineVaccine(lineData, country, color){
         .data(lineData)
         .transition()
         .duration(750)
-        .attr('fill', 'none')
+        .style('fill', color)
         .attr("cy", function(d) { return y(+d.Vaccine); })
-
 }
 
 function createScatter(){
@@ -411,8 +408,8 @@ function createScatter(){
         width = +svg.attr("width"),
         height = +svg.attr("height");
     
-    var yDomain = d3.extent(lineAllData, function(d) { return d3.max([+d.Vaccine])});
-    var xDomain = d3.extent(lineAllData, function(d) { return d3.max([+d.Death])});
+    var yDomain = d3.extent(lineAllData, function(d) { return +d.Vaccine});
+    var xDomain = d3.extent(lineAllData, function(d) { return +d.Death});
 
     let y = d3.scaleLinear()
         .domain(yDomain)
@@ -479,4 +476,37 @@ function createScatter(){
             .style("opacity", 0)
             .style('pointer-events', 'none');
     }
+}
+function updateScatter(scattterData, country, color){
+    var svg = d3.select("#scatterChart"),
+        width = +svg.attr("width"),
+        height = +svg.attr("height");
+    
+    var yDomain = d3.extent(scattterData, function(d) { return +d.Vaccine});
+    var xDomain = d3.extent(scattterData, function(d) { return +d.Death});
+
+    let y = d3.scaleLinear()
+        .domain(yDomain)
+        .range([(height * 0.8), 25]);
+
+    let x = d3.scaleLinear()
+        .domain(xDomain)
+        .range([0, (width * 0.8)]);
+    
+    let yAxis = d3.axisLeft(y).ticks(7);
+    let xAxis = d3.axisBottom(x).ticks(5);
+
+    var chartGroup = svg.select('g')
+
+    chartGroup.select('g.x.axis').call(xAxis);
+    chartGroup.select('g.y.axis').call(yAxis);
+
+    chartGroup.select('#dotsRel')
+        .selectAll("circle")
+        .data(scattterData)
+        .transition()
+        .duration(750)
+        .style("fill", color)
+        .attr("cx", function(d) { return x(+d.Death); })
+        .attr("cy", function(d) { return y(+d.Vaccine); });
 }

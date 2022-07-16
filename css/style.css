@@ -23,13 +23,23 @@
 }
 
 .pieChart {
-    background-color:#3b1a79c9;
+    background-color:#3b1a7991;
 }
 
-.lineChart {
+.Left {
+    text-align: left;
+    width: 49.5%;
+    float:right;
+}
+
+.Right {
+    text-align: right;
+    width: 49.5%;
     float:left;
 }
 
 .scatterChart {
-    float:right;
+    align-items: center;
+    display: block; 
+    margin: auto;
 }

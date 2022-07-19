@@ -2,7 +2,7 @@ let geojsonData = []
 var cholData = d3.map();
 var lineAllData = []
 var parseDate = d3.timeParse("%Y-%m");
-var formatDate = d3.timeFormat("%Y-%m");
+var formatDate = d3.timeFormat("%b %Y");
 var dates = []
 var datas = []
 const colorRange = ["#F44236", '#EA1E63', '#9C28B1', '#673AB7', '#009788', '#00BCD5', '#03A9F5', '#2196F3', '#3F51B5', '#4CB050', '#8BC24A', '#CDDC39', '#FFEB3C', '#FEC107', '#FE5721','red']
@@ -42,7 +42,6 @@ Promise.all([
             d[i].Date = formatDate(parseDate(d[i].Date));
     })
 ]).then(function(loadData) {
-    console.log(loadData[0])
     createChoropleth(loadData[0])
     createLineDeath()
     createLineVaccine()
@@ -55,9 +54,9 @@ function createChoropleth(topo) {
         width = (+svg.attr("width").replace("%","") /100)* screen.width,
         height = +svg.attr("height");
     var projection = d3.geoMercator()
-        .scale(2100) // adjust size map
-        .center([122, -2])
-        .translate([width, height]);
+        .scale(2800) // adjust size map
+        .center([107, 4])
+        .translate([width/2, height/2]);
 
 
     var tooltip = d3.select("div")
@@ -155,7 +154,7 @@ function createChoropleth(topo) {
 
 function createLineDeath() {
     var svg = d3.select("#lineChartDeath"),
-        width = +svg.attr("width"),
+        width = (+svg.attr("width").replace("%","") /100)* screen.width,
         height = +svg.attr("height");
 
     var maxY = d3.max(lineAllData, function(d) { return d3.max([+d.Death]) });
@@ -185,11 +184,11 @@ function createLineDeath() {
         .x(function(d) { return x(d.Date); })
         .y(function(d) { return y(+d.Death); })
 
-    chartGroup.append('path').attr('d', lineDeath(lineAllData)).attr('id', 'lineDeath')
-    chartGroup.append('g').attr('class', 'x axis').attr('transform', 'translate(0,320)').call(xAxis)
-    chartGroup.append('g').attr('class', 'y axis').attr('transform', 'translate(0,0)').call(yAxis)
+    chartGroup.append('path').attr('d', lineDeath(lineAllData)).attr('id', 'lineDeath').attr('transform', 'translate(20,0)')
+    chartGroup.append('g').attr('class', 'x axis').attr('transform', 'translate(20,'+height*0.8+')').call(xAxis)
+    chartGroup.append('g').attr('class', 'y axis').attr('transform', 'translate(20,0)').call(yAxis)
 
-    chartGroup.select('#lineDeath').attr('fill', 'none').attr('stroke', 'red')
+    chartGroup.select('#lineDeath').attr('fill', 'none').attr('stroke', 'black')
 
     chartGroup.append('g')
         .attr('id', 'dotsDeath')
@@ -200,11 +199,24 @@ function createLineDeath() {
         .attr("cx", function(d) { return x(d.Date); })
         .attr("cy", function(d) { return y(+d.Death); })
         .attr("r", 5)
+        .attr('transform', 'translate(20,0)')
         .style("fill", "black")
         .on("mouseover", mouseOverDeath)
         .on("mouseleave", mouseLeave);
+    
+    var legend = svg.append("g")
+        .attr("id", "legend");
+    
+    legend.append("text")
+        .attr('x',width/2)
+        .attr('y',height*0.075)
+        .attr('text-align', 'center')
+        .text("Overall's Death Line Chart")
+        .attr('font-weight', 'bold')
+        .attr('font-size', "24" + "px")
+        .attr('text-anchor', 'middle');
 
-    var tooltip = d3.select("#dtip")
+    var tooltip = d3.select("#MainViz")
         .append("div")
         .attr('id', 'tipLine')
         .style("opacity", 0)
@@ -222,7 +234,7 @@ function createLineDeath() {
             .duration(10)
             .style("opacity", 1);
         tooltip
-            .html("Date: " + d.Date + "<br>Total Death: " + d.Death)
+            .html("Date: " + formatDate(d.Date) + "<br>Total Death: " + d.Death)
             .style("left", (d3.event.pageX) + "px")
             .style("top", (d3.event.pageY - 90) + "px")
     }
@@ -238,7 +250,7 @@ function createLineDeath() {
 
 function updateLineDeath(lineData, country, color){
     var svg = d3.select("#lineChartDeath"),
-        width = +svg.attr("width"),
+        width = (+svg.attr("width").replace("%","") /100)* screen.width,
         height = +svg.attr("height");
         
     var maxY = d3.max(lineData, function(d) { return d3.max([+d.Death]) });
@@ -277,12 +289,17 @@ function updateLineDeath(lineData, country, color){
         .duration(750)
         .style('fill', color)
         .attr("cy", function(d) { return y(+d.Death); })
+    
+        var legend = svg.select("g#legend")
+
+        legend.select("text")
+            .text(country +"'s Death Line Chart")
 
 }
 
 function createLineVaccine() {
     var svg = d3.select("#lineChartVaccine"),
-        width = +svg.attr("width"),
+        width = (+svg.attr("width").replace("%","") /100)* screen.width,
         height = +svg.attr("height");
 
     var maxY = d3.max(lineAllData, function(d) { return d3.max([+d.Vaccine]) });
@@ -312,11 +329,11 @@ function createLineVaccine() {
         .x(function(d) { return x(d.Date); })
         .y(function(d) { return y(+d.Vaccine); })
 
-    chartGroup.append('path').attr('d', lineVacc(lineAllData)).attr('id', 'lineVacc')
-    chartGroup.append('g').attr('class', 'x axis').attr('transform', 'translate(0,320)').call(xAxis)
-    chartGroup.append('g').attr('class', 'y axis').attr('transform', 'translate(0,0)').call(yAxis)
+    chartGroup.append('path').attr('d', lineVacc(lineAllData)).attr('id', 'lineVacc').attr('transform', 'translate(20,0)')
+    chartGroup.append('g').attr('class', 'x axis').attr('transform', 'translate(20,'+height*0.8+')').call(xAxis)
+    chartGroup.append('g').attr('class', 'y axis').attr('transform', 'translate(20,0)').call(yAxis)
 
-    chartGroup.select('#lineVacc').attr('fill', 'none').attr('stroke', 'green')
+    chartGroup.select('#lineVacc').attr('fill', 'none').attr('stroke', 'black')
 
     chartGroup.append('g')
         .attr('id', 'dotsVacc')
@@ -327,11 +344,24 @@ function createLineVaccine() {
         .attr("cx", function(d) { return x(d.Date); })
         .attr("cy", function(d) { return y(+d.Vaccine); })
         .attr("r", 5)
+        .attr('transform', 'translate(20,0)')
         .style("fill", "blue")
         .on("mouseover", mouseOverVacc)
         .on("mouseleave", mouseLeave);
+    
+    var legend = svg.append("g")
+        .attr("id", "legend");
+    
+    legend.append("text")
+        .attr('x',width/2)
+        .attr('y',height*0.075)
+        .attr('text-align', 'center')
+        .text("Overall's Vaccine Line Chart")
+        .attr('font-weight', 'bold')
+        .attr('font-size', "24" + "px")
+        .attr('text-anchor', 'middle');
 
-    var tooltip = d3.select("#dtip")
+    var tooltip = d3.select("#MainViz")
         .append("div")
         .attr('id', 'tipLine')
         .style("opacity", 0)
@@ -349,7 +379,7 @@ function createLineVaccine() {
             .duration(10)
             .style("opacity", 1);
         tooltip
-            .html("Date: " + d.Date + "<br>Total Vaccine: " + d.Vaccine)
+            .html("Date: " + formatDate(d.Date) + "<br>Total Vaccine: " + d.Vaccine)
             .style("left", (d3.event.pageX) + "px")
             .style("top", (d3.event.pageY - 90) + "px")
     }
@@ -365,7 +395,7 @@ function createLineVaccine() {
 
 function updateLineVaccine(lineData, country, color){
     var svg = d3.select("#lineChartVaccine"),
-        width = +svg.attr("width"),
+        width = (+svg.attr("width").replace("%","") /100)* screen.width,
         height = +svg.attr("height");
 
     var maxY = d3.max(lineData, function(d) { return d3.max([+d.Vaccine]) });
@@ -401,11 +431,16 @@ function updateLineVaccine(lineData, country, color){
         .duration(750)
         .style('fill', color)
         .attr("cy", function(d) { return y(+d.Vaccine); })
+
+    var legend = svg.select("g#legend")
+
+    legend.select("text")
+        .text(country +"'s Vaccine Line Chart")
 }
 
 function createScatter(){
     var svg = d3.select("#scatterChart"),
-        width = +svg.attr("width"),
+        width = (+svg.attr("width").replace("%","") /100)* screen.width,
         height = +svg.attr("height");
     
     var yDomain = d3.extent(lineAllData, function(d) { return +d.Vaccine});
@@ -417,7 +452,7 @@ function createScatter(){
 
     let x = d3.scaleLinear()
         .domain(xDomain)
-        .range([0, (width * 0.8)]);
+        .range([0, (width)]);
     
     let yAxis = d3.axisLeft(y).ticks(7);
     let xAxis = d3.axisBottom(x).ticks(5);
@@ -429,8 +464,8 @@ function createScatter(){
     var chartGroup = svg.append('g')
         .attr('transform', 'translate(50,50)');
 
-    chartGroup.append('g').attr('class', 'x axis').attr('transform', 'translate(0,320)').call(xAxis);
-    chartGroup.append('g').attr('class', 'y axis').attr('transform', 'translate(0,0)').call(yAxis);
+    chartGroup.append('g').attr('class', 'x axis').attr('transform', 'translate(20,'+height*0.8+')').call(xAxis);
+    chartGroup.append('g').attr('class', 'y axis').attr('transform', 'translate(20,0)').call(yAxis);
 
     chartGroup.append('g')
         .attr('id', 'dotsRel')
@@ -441,11 +476,24 @@ function createScatter(){
         .attr("cx", function(d) { return x(+d.Death); })
         .attr("cy", function(d) { return y(+d.Vaccine); })
         .attr("r", 4)
+        .attr('transform', 'translate(20,0)')
         .style("fill", "black")
         .on("mouseover", mouseOver)
         .on("mouseleave", mouseLeave);
 
-    var tooltip = d3.select("#dtip")
+    var legend = svg.append("g")
+        .attr("id", "legend");
+    
+    legend.append("text")
+        .attr('x',width/2)
+        .attr('y',height*0.075)
+        .attr('text-align', 'center')
+        .text('Vaccine x Death Overall Scatter Plot')
+        .attr('font-weight', 'bold')
+        .attr('font-size', "24" + "px")
+        .attr('text-anchor', 'middle');
+
+    var tooltip = d3.select("#MainViz")
         .append("div")
         .attr('id', 'tipLine')
         .style("opacity", 0)
@@ -458,7 +506,6 @@ function createScatter(){
         .style("position", "absolute")
 
     function mouseOver(d) {
-        console.log(d)
         tooltip
             .transition()
             .duration(10)
@@ -479,7 +526,7 @@ function createScatter(){
 }
 function updateScatter(scattterData, country, color){
     var svg = d3.select("#scatterChart"),
-        width = +svg.attr("width"),
+        width = (+svg.attr("width").replace("%","") /100)* screen.width,
         height = +svg.attr("height");
     
     var yDomain = d3.extent(scattterData, function(d) { return +d.Vaccine});
@@ -509,4 +556,9 @@ function updateScatter(scattterData, country, color){
         .style("fill", color)
         .attr("cx", function(d) { return x(+d.Death); })
         .attr("cy", function(d) { return y(+d.Vaccine); });
+
+    var legend = svg.select("g#legend")
+    
+    legend.select("text")
+        .text('Vaccine x Death '+country+' Scatter Plot')
 }

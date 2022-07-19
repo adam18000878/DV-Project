@@ -14,16 +14,11 @@
 
 <body>
     <div id="MainViz" class="mainViz" width="100%">
-        <!-- <div class="Right" style="width: 55%;height:425;"> <svg id="choroplethChart" class="choroplethChart" width="750" height="400"></svg> </div>
-        <div class="Left" style="width: 40%;height:425;" > <svg id="pieChart" class="pieChart" width="400" height="400"></svg> </div> -->
-        <svg id="choroplethChart" class="choroplethChart" width="55%" height="400" class="Right"></svg>
-        <svg id="pieChart" class="pieChart" width="400" height="40%" class="Left"></svg>
+        <svg id="choroplethChart" class="choroplethChart" width="49%" height="500" class="Right"></svg>
+        <svg id="scatterChart" height="500" class="Left" width="49%" style="background-color: rgba(187, 194, 123, 0.781);"></svg>
         
-        <div id="dtip">
-            <div class="Right"> <svg id="lineChartDeath" width="500" height="400" style="background-color: rgba(187, 194, 123, 0.781);"></svg> </div>
-            <div class="Left"> <svg id="lineChartVaccine" width="500" height="400" style="background-color: rgba(187, 194, 123, 0.781);"></svg> </div>
-        </div>
-        <div class="centerGraphs"> <svg id="scatterChart" width="500" height="400" class="scatterChart" style="background-color: rgba(187, 194, 123, 0.781);"></svg> </div>
+        <svg id="lineChartDeath" width="49%" height="500" style="background-color: rgba(187, 194, 123, 0.781);" class="Right"></svg>
+        <svg id="lineChartVaccine" width="49%" height="500" style="background-color: rgba(187, 194, 123, 0.781);" class="Left"></svg> 
     </div>
     <script type="text/javascript" src="js/dashboard.js"></script>
 </body>

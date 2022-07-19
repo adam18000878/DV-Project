@@ -28,13 +28,11 @@
 
 .Left {
     text-align: left;
-    width: 49.5%;
     float:right;
 }
 
 .Right {
     text-align: right;
-    width: 49.5%;
     float:left;
 }
 

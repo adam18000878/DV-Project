@@ -6,11 +6,15 @@ var formatDate = d3.timeFormat("%b %Y");
 var dates = []
 var datas = []
 const colorRange = ["#F44236", '#EA1E63', '#9C28B1', '#673AB7', '#009788', '#00BCD5', '#03A9F5', '#2196F3', '#3F51B5', '#4CB050', '#8BC24A', '#CDDC39', '#FFEB3C', '#FEC107', '#FE5721','red']
-    // const stateCode = ['slg', 'kl', 'jhr', 'sbh', 'srw', 'ngs', 'png', 'kel', 'prk', 'kdh', 'mlk', 'phg', 'tg', 'pj', 'pls']
 const stateCode = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+const vacCode = ['Pfizer','Sinovac','AstraZeneca','Sinopharm','CanSino']
 var colorScale = d3.scaleThreshold()
     .domain(stateCode)
     .range(colorRange);
+
+var vacColor = d3.scaleOrdinal()
+        .domain(vacCode)
+        .range(['#F25F0F','#019EC8','#580501','#013279','#0CDD97']);
 
 Promise.all([
     d3.json("data/map.geojson"),
@@ -19,6 +23,11 @@ Promise.all([
         datas = d
         tempAllDataDeath = 0
         tempAllDataVaccine = 0
+        tempAllPfizer = 0
+        tempAllSinovac = 0
+        tempAllAstraZeneca = 0
+        tempAllSinopharm = 0
+        tempAllCanSino = 0
         for (i in d) {
 
             if (i==0){
@@ -28,15 +37,32 @@ Promise.all([
                 lineAllData.push({
                     Date:parseDate(tempDate),
                     Death:tempAllDataDeath,
-                    Vaccine:tempAllDataVaccine
+                    Vaccine:tempAllDataVaccine,
+                    VaccineType: {
+                        Pfizer:tempAllPfizer,
+                        Sinovac:tempAllSinovac,
+                        AstraZeneca:tempAllAstraZeneca,
+                        Sinopharm:tempAllSinopharm,
+                        CanSino:tempAllCanSino
+                    }
                 })
                 tempDate = d[i].Date
                 dates.push(d[i].Date)
                 tempAllDataDeath = 0
                 tempAllDataVaccine = 0
+                tempAllPfizer = 0
+                tempAllSinovac = 0
+                tempAllAstraZeneca = 0
+                tempAllSinopharm = 0
+                tempAllCanSino = 0
             }
             tempAllDataDeath = tempAllDataDeath + Number(d[i]['Total Death'])
             tempAllDataVaccine = tempAllDataVaccine + Number(d[i]['Total Vaccination'])
+            tempAllPfizer = tempAllPfizer + Number(d[i]['Pfizer'])
+            tempAllSinovac = tempAllSinovac + Number(d[i]['Sinovac'])
+            tempAllAstraZeneca = tempAllAstraZeneca + Number(d[i]['AstraZeneca'])
+            tempAllSinopharm = tempAllSinopharm + Number(d[i]['Sinopharm'])
+            tempAllCanSino = tempAllCanSino + Number(d[i]['CanSino'])
         }
             
             d[i].Date = formatDate(parseDate(d[i].Date));
@@ -46,6 +72,27 @@ Promise.all([
     createLineDeath()
     createLineVaccine()
     createScatter()
+    pieData = []
+    tempPieData = []
+    totalSum = 0
+    pieGroup = Object.keys(lineAllData[0].VaccineType)
+
+    for (i in pieGroup){
+        sum = 0
+        for( j in lineAllData){
+            sum = sum + Number(lineAllData[j].VaccineType[pieGroup[i]]);
+            totalSum = totalSum + Number(lineAllData[j].VaccineType[pieGroup[i]]);
+        }
+        pieData.push({
+            name:pieGroup[i],
+            value:sum
+        })
+    }
+    
+    for (i in pieData){
+        pieData[i].value = (pieData[i].value/totalSum).toFixed(2)
+    }
+    createPie(pieData,totalSum)
 })
 
 function createChoropleth(topo) {
@@ -127,6 +174,30 @@ function createChoropleth(topo) {
         updateLineDeath(lineData,d.properties.name,colorScale(d.total))
         updateLineVaccine(lineData,d.properties.name,colorScale(d.total))
         updateScatter(lineData,d.properties.name,colorScale(d.total))
+
+        pieData = []
+        totalSum = 0
+        for (i in pieGroup){
+            sum = 0
+            for (j in datas){
+                if (datas[j].id == d.properties.cartodb_id){
+                    if (j != 'columns'){                    
+                        sum = sum + Number(datas[j][pieGroup[i]]);
+                        totalSum = totalSum + Number(datas[j][pieGroup[i]]);
+                    }
+                }
+            }
+            pieData.push({
+                name:pieGroup[i],
+                value:sum
+            })
+        }
+
+        for (i in pieData){
+            pieData[i].value = (pieData[i].value/totalSum).toFixed(2)
+        }
+        // createPie(pieData,totalSum)
+        updatePie(pieData,totalSum)
     }
 
 
@@ -234,7 +305,7 @@ function createLineDeath() {
             .duration(10)
             .style("opacity", 1);
         tooltip
-            .html("Date: " + formatDate(d.Date) + "<br>Total Death: " + d.Death)
+            .html("Date: " + formatDate(d.Date) + "<br>Total Death: " + d.Death.toLocaleString())
             .style("left", (d3.event.pageX) + "px")
             .style("top", (d3.event.pageY - 90) + "px")
     }
@@ -289,6 +360,8 @@ function updateLineDeath(lineData, country, color){
         .duration(750)
         .style('fill', color)
         .attr("cy", function(d) { return y(+d.Death); })
+        .attr("cx", function(d) { return x(+d.Date); })
+        .attr('transform', 'translate(20,0)');
     
         var legend = svg.select("g#legend")
 
@@ -379,7 +452,7 @@ function createLineVaccine() {
             .duration(10)
             .style("opacity", 1);
         tooltip
-            .html("Date: " + formatDate(d.Date) + "<br>Total Vaccine: " + d.Vaccine)
+            .html("Date: " + formatDate(d.Date) + "<br>Total Vaccine: " + d.Vaccine.toLocaleString())
             .style("left", (d3.event.pageX) + "px")
             .style("top", (d3.event.pageY - 90) + "px")
     }
@@ -431,6 +504,7 @@ function updateLineVaccine(lineData, country, color){
         .duration(750)
         .style('fill', color)
         .attr("cy", function(d) { return y(+d.Vaccine); })
+        .attr("cx", function(d) { return x(+d.Date); })
 
     var legend = svg.select("g#legend")
 
@@ -452,7 +526,7 @@ function createScatter(){
 
     let x = d3.scaleLinear()
         .domain(xDomain)
-        .range([0, (width)]);
+        .range([0, (width *0.8)]);
     
     let yAxis = d3.axisLeft(y).ticks(7);
     let xAxis = d3.axisBottom(x).ticks(5);
@@ -561,4 +635,211 @@ function updateScatter(scattterData, country, color){
     
     legend.select("text")
         .text('Vaccine x Death '+country+' Scatter Plot')
+}
+
+function createPie(data,total){
+    const div = d3.select('#p2'),
+    width_s = (+div.attr('width').replace("%","")/100) * screen.width;
+    const svg = d3.select('#pieChart'),
+    width = (+svg.attr('width').replace("%","") /100) * width_s,
+    height = +svg.attr('height'),
+    outerRadius = (Math.min(width, height) / 2)-50,
+    innerRadiusFinal3 = outerRadius * .3;
+
+    const radius = 200;
+    const g = svg.append('g').attr('transform', `translate(${width/2}, ${height/2})`);
+
+    const pie = d3.pie().sort(null).value(d => d.value)
+
+    const path = d3.arc()
+        .outerRadius(outerRadius)
+        .innerRadius(radius - 90);
+    var path2 = d3.arc()
+        .innerRadius(innerRadiusFinal3)
+        .outerRadius(outerRadius);
+    const label = d3.arc()
+        .outerRadius(outerRadius)
+        .innerRadius(radius - 90);
+    
+    const pies = g.selectAll('.slice')
+        .data(pie(data))
+        .enter()
+        .append('g').attr('class', 'slice')
+        .on("mouseover", mouseOver)
+        .on("mouseleave", mouseLeave)
+        .on("mousemove", mouseMove);
+    
+    pies.append('path')
+        .attr('d', path)
+        .attr('fill', d => vacColor(d.data.name));
+
+    svg
+        .append('text')
+        .attr('id','totalDoses')
+        .attr('x', (width / 2))
+        .attr('y', (height / 2))
+        .attr('text-anchor', 'middle')
+        .attr('font-weight', 'bold')
+        .attr('font-size', "20" + "px")
+        .text(Number(total).toLocaleString() + ' Doses')
+    
+    xoffset = 10
+    yoffset = 30
+    l = 1
+
+    svg.selectAll("mydots")
+        .data(vacCode)
+        .enter()
+        .append("circle")
+            .attr("cx", 50)
+            .attr("cy", function(d,i){ return 50 + i*25}) // 100 is where the first dot appears. 25 is the distance between dots
+            .attr("r", 10)
+            .style("fill", function(d){ return vacColor(d)})
+    
+    svg.selectAll("mylabels")
+        .data(vacCode)
+        .enter()
+        .append("text")
+            .attr("x", 70)
+            .attr("y", function(d,i){ return 50 + i*25}) // 100 is where the first dot appears. 25 is the distance between dots
+            .text(function(d){ return d})
+            .attr("text-anchor", "left")
+            .style("alignment-baseline", "middle")    
+    
+    var legend = svg.append("g")
+        .attr("id", "legend");
+    
+    legend.append("text")
+        .attr('x',width/2)
+        .attr('y',height*0.06)
+        .attr('text-align', 'center')
+        .attr('font-weight', 'bold')
+        .attr('font-size', "24" + "px")
+        .attr('text-anchor', 'middle')
+        .text('Vaccine Distribution Pie Chart');
+
+    var tooltip = d3.select("#MainViz")
+        .append("div")
+        .attr('id','pieTip')
+        .style("opacity", 0)
+        .attr("class", "tooltip")
+        .style("background-color", "white")
+        .style("border", "solid")
+        .style("border-width", "2px")
+        .style("border-radius", "5px")
+        .style("padding", "10px")
+        .style("position", "absolute")
+
+
+    function mouseOver(d) {
+        tooltip
+            .transition()
+            .duration(10)
+            .style("opacity", 1);
+
+        d3.select(this).select("path").transition()
+            .duration(400)
+            .attr("d", path2);
+    }
+
+    function mouseMove(d) {
+        tooltip
+            .html(d.data.name +": "+Number((d.data.value * total).toFixed(0)).toLocaleString() + " Dose.")
+            .style("left", (d3.event.pageX) + "px")
+            .style("top", (d3.event.pageY - 90) + "px")
+    }
+
+    function mouseLeave(d) {
+        tooltip
+            .transition()
+            .duration(10)
+            .style("opacity", 0)
+            .style('pointer-events', 'none');
+
+        d3.select(this).select("path").transition()
+            .duration(400)
+            .attr("d", path);
+    }
+}
+
+function updatePie(data,total){
+    const div = d3.select('#p2'),
+        width_s = (+div.attr('width').replace("%","")/100) * screen.width;
+    const svg = d3.select('#pieChart'),
+        width = (+svg.attr('width').replace("%","") /100) * width_s,
+        height = +svg.attr('height'),
+        outerRadius = (Math.min(width, height) / 2)-50,
+        innerRadiusFinal3 = outerRadius * .3;
+    
+        const radius = 200;
+
+    const path = d3.arc()
+        .outerRadius(outerRadius)
+        .innerRadius(radius - 90);
+    var path2 = d3.arc()
+        .innerRadius(innerRadiusFinal3)
+        .outerRadius(outerRadius);
+
+    const g = svg.select('g')
+    
+    const pie = d3.pie().sort(null).value(d => d.value)
+
+    const pies = g.selectAll('.slice')
+        .data(pie(data))
+        .transition()
+        .duration(750)
+        .select('path')
+        .attr('d',path);
+    
+    g.selectAll('.slice')
+        .on("mouseover", mouseOver)
+        .on("mouseleave", mouseLeave)
+        .on("mousemove", mouseMove);
+    
+    d3.select('#pieTip').remove()
+
+    var tooltip = d3.select("#MainViz")
+        .append("div")
+        .attr('id','pieTip')
+        .style("opacity", 0)
+        .attr("class", "tooltip")
+        .style("background-color", "white")
+        .style("border", "solid")
+        .style("border-width", "2px")
+        .style("border-radius", "5px")
+        .style("padding", "10px")
+        .style("position", "absolute")
+
+
+    function mouseOver(d) {
+        tooltip
+            .transition()
+            .duration(10)
+            .style("opacity", 1);
+
+        d3.select(this).select("path").transition()
+            .duration(400)
+            .attr("d", path2);
+    }
+
+    function mouseMove(d) {
+        tooltip
+            .html(d.data.name +": "+Number((d.data.value * total).toFixed(0)).toLocaleString() + " Dose.")
+            .style("left", (d3.event.pageX) + "px")
+            .style("top", (d3.event.pageY - 90) + "px")
+    }
+
+    function mouseLeave(d) {
+        tooltip
+            .transition()
+            .duration(10)
+            .style("opacity", 0)
+            .style('pointer-events', 'none');
+
+        d3.select(this).select("path").transition()
+            .duration(400)
+            .attr("d", path);
+    }
+
+    svg.select('#totalDoses').text(Number(total).toLocaleString() + ' Doses')
 }

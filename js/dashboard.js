@@ -8,7 +8,7 @@ var datas = []
 const colorRange = ["#F44236", '#EA1E63', '#9C28B1', '#673AB7', '#009788', '#00BCD5', '#03A9F5', '#2196F3', '#3F51B5', '#4CB050', '#8BC24A', '#CDDC39', '#FFEB3C', '#FEC107', '#FE5721','red']
 const stateCode = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
 const vacCode = ['Pfizer','Sinovac','AstraZeneca','Sinopharm','CanSino']
-var colorScale = d3.scaleThreshold()
+var colorScale = d3.scaleOrdinal()
     .domain(stateCode)
     .range(colorRange);
 

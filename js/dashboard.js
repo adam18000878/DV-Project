@@ -16,84 +16,92 @@ var vacColor = d3.scaleOrdinal()
         .domain(vacCode)
         .range(['#F25F0F','#019EC8','#580501','#013279','#0CDD97']);
 
-Promise.all([
-    d3.json("data/map.geojson"),
-    d3.csv("data/stateName.csv", function(d) { cholData.set(d.code, +d.id) }),
-    d3.csv("data/death_to_vacc_dataset.csv").then(function(d) {
-        datas = d
-        tempAllDataDeath = 0
-        tempAllDataVaccine = 0
-        tempAllPfizer = 0
-        tempAllSinovac = 0
-        tempAllAstraZeneca = 0
-        tempAllSinopharm = 0
-        tempAllCanSino = 0
-        for (i in d) {
-
-            if (i==0){
-                tempDate = d[i].Date
-            }
-            if (tempDate != d[i].Date){
-                lineAllData.push({
-                    Date:parseDate(tempDate),
-                    Death:tempAllDataDeath,
-                    Vaccine:tempAllDataVaccine,
-                    VaccineType: {
-                        Pfizer:tempAllPfizer,
-                        Sinovac:tempAllSinovac,
-                        AstraZeneca:tempAllAstraZeneca,
-                        Sinopharm:tempAllSinopharm,
-                        CanSino:tempAllCanSino
-                    }
-                })
-                tempDate = d[i].Date
-                dates.push(d[i].Date)
-                tempAllDataDeath = 0
-                tempAllDataVaccine = 0
-                tempAllPfizer = 0
-                tempAllSinovac = 0
-                tempAllAstraZeneca = 0
-                tempAllSinopharm = 0
-                tempAllCanSino = 0
-            }
-            tempAllDataDeath = tempAllDataDeath + Number(d[i]['Total Death'])
-            tempAllDataVaccine = tempAllDataVaccine + Number(d[i]['Total Vaccination'])
-            tempAllPfizer = tempAllPfizer + Number(d[i]['Pfizer'])
-            tempAllSinovac = tempAllSinovac + Number(d[i]['Sinovac'])
-            tempAllAstraZeneca = tempAllAstraZeneca + Number(d[i]['AstraZeneca'])
-            tempAllSinopharm = tempAllSinopharm + Number(d[i]['Sinopharm'])
-            tempAllCanSino = tempAllCanSino + Number(d[i]['CanSino'])
-        }
-            
-            d[i].Date = formatDate(parseDate(d[i].Date));
-    })
-]).then(function(loadData) {
-    createChoropleth(loadData[0])
-    createLineDeath()
-    createLineVaccine()
-    createScatter()
-    pieData = []
-    tempPieData = []
-    totalSum = 0
-    pieGroup = Object.keys(lineAllData[0].VaccineType)
-
-    for (i in pieGroup){
-        sum = 0
-        for( j in lineAllData){
-            sum = sum + Number(lineAllData[j].VaccineType[pieGroup[i]]);
-            totalSum = totalSum + Number(lineAllData[j].VaccineType[pieGroup[i]]);
-        }
-        pieData.push({
-            name:pieGroup[i],
-            value:sum
-        })
-    }
+function create(){
+    Promise.all([
+        d3.json("data/map.geojson"),
+        d3.csv("data/stateName.csv", function(d) { cholData.set(d.code, +d.id) }),
+        d3.csv("data/death_to_vacc_dataset.csv").then(function(d) {
+            datas = d
+            tempAllDataDeath = 0
+            tempAllDataVaccine = 0
+            tempAllPfizer = 0
+            tempAllSinovac = 0
+            tempAllAstraZeneca = 0
+            tempAllSinopharm = 0
+            tempAllCanSino = 0
+            for (i in d) {
     
-    for (i in pieData){
-        pieData[i].value = (pieData[i].value/totalSum).toFixed(2)
-    }
-    createPie(pieData,totalSum)
-})
+                if (i==0){
+                    tempDate = d[i].Date
+                }
+                if (tempDate != d[i].Date){
+                    lineAllData.push({
+                        Date:parseDate(tempDate),
+                        Death:tempAllDataDeath,
+                        Vaccine:tempAllDataVaccine,
+                        VaccineType: {
+                            Pfizer:tempAllPfizer,
+                            Sinovac:tempAllSinovac,
+                            AstraZeneca:tempAllAstraZeneca,
+                            Sinopharm:tempAllSinopharm,
+                            CanSino:tempAllCanSino
+                        }
+                    })
+                    tempDate = d[i].Date
+                    dates.push(d[i].Date)
+                    tempAllDataDeath = 0
+                    tempAllDataVaccine = 0
+                    tempAllPfizer = 0
+                    tempAllSinovac = 0
+                    tempAllAstraZeneca = 0
+                    tempAllSinopharm = 0
+                    tempAllCanSino = 0
+                }
+                tempAllDataDeath = tempAllDataDeath + Number(d[i]['Total Death'])
+                tempAllDataVaccine = tempAllDataVaccine + Number(d[i]['Total Vaccination'])
+                tempAllPfizer = tempAllPfizer + Number(d[i]['Pfizer'])
+                tempAllSinovac = tempAllSinovac + Number(d[i]['Sinovac'])
+                tempAllAstraZeneca = tempAllAstraZeneca + Number(d[i]['AstraZeneca'])
+                tempAllSinopharm = tempAllSinopharm + Number(d[i]['Sinopharm'])
+                tempAllCanSino = tempAllCanSino + Number(d[i]['CanSino'])
+            }
+                
+                d[i].Date = formatDate(parseDate(d[i].Date));
+        })
+    ]).then(function(loadData) {
+        createChoropleth(loadData[0])
+        createLineDeath()
+        createLineVaccine()
+        createScatter()
+        pieData = []
+        tempPieData = []
+        totalSum = 0
+        pieGroup = Object.keys(lineAllData[0].VaccineType)
+        temp = []
+    
+        for (i in pieGroup){
+            sum = 0
+            for( j in lineAllData){
+                sum = sum + Number(lineAllData[j].VaccineType[pieGroup[i]]);
+                totalSum = totalSum + Number(lineAllData[j].VaccineType[pieGroup[i]]);
+            }
+            pieData.push({
+                name:pieGroup[i],
+                value:sum
+            })
+            temp.push({
+                name:pieGroup[i],
+                value:sum
+            })
+        }
+        
+        // for (i in pieData){
+        //     pieData[i].value = (pieData[i].value/totalSum).toFixed(2)
+        // }
+        // createPie(pieData,totalSum)
+        createBar(temp,totalSum)
+    })
+}
 
 function createChoropleth(topo) {
 
@@ -176,6 +184,7 @@ function createChoropleth(topo) {
         updateScatter(lineData,d.properties.name,colorScale(d.total))
 
         pieData = []
+        barData = []
         totalSum = 0
         for (i in pieGroup){
             sum = 0
@@ -191,13 +200,18 @@ function createChoropleth(topo) {
                 name:pieGroup[i],
                 value:sum
             })
+            barData.push({
+                name:pieGroup[i],
+                value:sum
+            })
         }
 
         for (i in pieData){
             pieData[i].value = (pieData[i].value/totalSum).toFixed(2)
         }
         // createPie(pieData,totalSum)
-        updatePie(pieData,totalSum)
+        // updatePie(pieData,totalSum)
+        updateBar(barData,totalSum,d.properties.name)
     }
 
 
@@ -843,3 +857,193 @@ function updatePie(data,total){
 
     svg.select('#totalDoses').text(Number(total).toLocaleString() + ' Doses')
 }
+
+function createBar(data, total){
+
+    const div = d3.select('#p2'),
+    width_s = (+div.attr('width').replace("%","")/100) * screen.width;
+    const svg = d3.select('#pieChart'),
+    width = (+svg.attr('width').replace("%","") /100) * width_s,
+    height = +svg.attr('height'),
+    outerRadius = (Math.min(width, height) / 2)-50,
+    innerRadiusFinal3 = outerRadius * .3;
+
+    
+    svg.append('svg')
+        .attr('height', height - 30)
+        .attr('width', width - 100);
+
+    var chartGroup = svg.append('g')
+        .attr('transform', 'translate(50,50)');
+
+    var x = d3.scaleBand()
+        .range([0,width*0.8])
+        .domain(data.map(function(d) { return d.name; }))
+        .padding(0.5)
+    
+    yDomain = d3.extent(data.map(function(d) { return d.value; }))
+    var y = d3.scaleLinear()
+        .range([height*0.8, 25])
+        .domain([yDomain[0]-10000, yDomain[1]+10000000])
+    
+    chartGroup.append("g")
+        .attr("transform", "translate(20," + (height*0.8) + ")")
+        .attr('class', 'x axis')
+        .call(d3.axisBottom(x))
+        .selectAll("text")
+        .style("text-anchor", "middle")
+        .style("font-size", "large")
+        .on("mouseover", mouseOverText)
+        .on("mouseleave", mouseLeave);
+    
+    chartGroup.append("g")
+        .attr("transform", "translate(20,0)")
+        .attr('class', 'y axis')
+        .call(d3.axisLeft(y));
+    
+    chartGroup.selectAll("mybar")
+        .data(data)
+        .enter()
+        .append("rect")
+        .attr("x", function(d) { return x(d.name); })
+        .attr("width", x.bandwidth())
+        .attr("fill", function(d) {return vacColor(d.name)})
+        .attr("y", function(d) { return y(0); })
+        .on("mouseover", mouseOverBar)
+        .on("mouseleave", mouseLeave)
+    
+    chartGroup.selectAll("rect")
+        .transition()
+        .duration(500)
+        .attr("y", function(d) { return y(d.value); })
+        .attr("height", function(d) { return (height*0.8) - y(d.value); })
+        .delay(function(d,i){return(i*100)})
+
+
+    var legend = svg.append("g")
+        .attr("id", "legend");
+    
+    legend.append("text")
+        .attr('x',width/2)
+        .attr('y',height*0.075)
+        .attr('text-align', 'center')
+        .attr('font-weight', 'bold')    
+        .attr('font-size', "24" + "px")
+        .attr('text-anchor', 'middle')
+        .text('Vaccine Type Distribution');
+    
+    legend.append('text').attr('id','totalVac')
+        .text(Number(total).toLocaleString() + " Doses")
+        .style("font-weight","500")
+        .style("font-size","24px")
+        .attr('x',width/2)
+        .attr('y',height*0.15)
+        .attr('text-anchor', 'middle')
+
+    var tooltip = d3.select("#MainViz")
+        .append("div")
+        .attr('id', 'tipLine')
+        .style("opacity", 0)
+        .attr("class", "tooltip")
+        .style("background-color", "white")
+        .style("border", "solid")
+        .style("border-width", "1px")
+        .style("border-radius", "5px")
+        .style("padding", "5px")
+        .style("position", "absolute")
+
+    function mouseOverBar(d) {
+        tooltip
+            .transition()
+            .duration(100)
+            .style("opacity", 1);
+        tooltip
+            .html(Number(d.value).toLocaleString() + " Doses")
+            .style("left", (d3.event.pageX) + "px")
+            .style("top", (d3.event.pageY - 90) + "px")
+    }
+
+    function mouseOverText(d) {
+        temp = []
+        for (i in data){
+            if (data[i].name == d) temp = data[i].value;
+        }
+        tooltip
+            .transition()
+            .duration(100)
+            .style("opacity", 1);
+        tooltip
+            .html(Number(temp).toLocaleString() + " Doses")
+            .style("left", (d3.event.pageX) + "px")
+            .style("top", (d3.event.pageY - 90) + "px")
+    }
+
+    function mouseLeave(d) {
+        tooltip
+            .transition()
+            .duration(100)
+            .style("opacity", 0)
+            .style('pointer-events', 'none');
+    }
+}
+
+function updateBar(data, total, state){
+    const div = d3.select('#p2'),
+    width_s = (+div.attr('width').replace("%","")/100) * screen.width;
+    const svg = d3.select('#pieChart'),
+    width = (+svg.attr('width').replace("%","") /100) * width_s,
+    height = +svg.attr('height');
+
+
+    var chartGroup = svg.select('g')
+
+    var x = d3.scaleBand()
+        .domain(data.map(function(d) { return d.name; }))
+        .range([0,width*0.8])
+    
+    yDomain = d3.extent(data.map(function(d) { return d.value; }))
+    var y = d3.scaleLinear()
+        .domain([yDomain[0]-10000, yDomain[1]+1000000])
+        .range([height*0.8, 25])
+    
+    
+    let yAxis = d3.axisLeft(y).ticks(7);
+    let xAxis = d3.axisBottom(x).ticks(5);
+    
+    chartGroup.select('g.x.axis').call(xAxis);
+    chartGroup.select('g.y.axis').call(yAxis);
+    
+    chartGroup.selectAll("rect")
+        .data(data)
+        .transition()
+        .duration(500)
+        .attr("y", function(d) { return y(d.value); })
+        .attr("height", function(d) { return (height*0.8) - y(d.value); })
+        .delay(function(d,i){return(i*100)})
+
+    var legend = svg.select("g#legend")
+    
+    legend.select("text")
+        .text(state + "'s Vaccine Distribution")
+    
+    
+    legend.select('#totalVac')
+        .text(Number(total).toLocaleString() + " Doses")
+}
+
+function reset(){
+    var chor = document.getElementById("choroplethChart");
+    var pie = document.getElementById("pieChart");
+    var scatter = document.getElementById("scatterChart");
+    var death = document.getElementById("lineChartDeath");
+    var vaccine = document.getElementById("lineChartVaccine");
+    chor.innerHTML = '';
+    pie.innerHTML = '';
+    scatter.innerHTML = '';
+    death.innerHTML = '';
+    vaccine.innerHTML = '';
+
+    create()
+}
+
+create()

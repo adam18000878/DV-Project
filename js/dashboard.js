@@ -8,15 +8,21 @@ var datas = []
 const colorRange = ["#F44236", '#EA1E63', '#9C28B1', '#673AB7', '#009788', '#00BCD5', '#03A9F5', '#2196F3', '#3F51B5', '#4CB050', '#8BC24A', '#CDDC39', '#FFEB3C', '#FEC107', '#FE5721','red']
 const stateCode = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
 const vacCode = ['Pfizer','Sinovac','AstraZeneca','Sinopharm','CanSino']
+const orititle = 'Insights';
+const oridiscussion = 'In the dashboard, there are 4 graphs that shows the data which we will be discussing in this part.For vaccine x death overall scatter plot, we can see that there are a cluster of dots on the left side of the graph.The plot also shows the increasing pattern. Since vaccine is given, we can see the death is much lesser than before.Increment of death would be cause by the mutation of the virus which using greek alphabet. 2nd graph which is vaccine type distribution which shows on the type of vaccine and amount of it distributed. We can see that Pfizer have the highest distribution among other different vaccine. However for Sinopharm is very low which is 43,803 doses was distributed. Next, Overalls Death Line Chart which shows amount of deceased over a duration. We can see the line chart peak at 9,669 during September 2021. At this time, SARS-CoV-2 Variants which is Alpha, Beta, Gamma and Delta have peak and causes many infected people to face fatality.Next, Overall vaccine line chart show on how many vaccine was distribued over a specific duration.It peak on August 2021 which have total vaccine of 14,434,117. In July 2022, the vaccine distributed is 206,072.In this time, the booster was distributed.'
+
 var colorScale = d3.scaleOrdinal()
     .domain(stateCode)
     .range(colorRange);
+
 
 var vacColor = d3.scaleOrdinal()
         .domain(vacCode)
         .range(['#F25F0F','#019EC8','#580501','#013279','#0CDD97']);
 
 function create(){
+    d3.select('#title').text(orititle);
+    d3.select('#discussion').text(oridiscussion);
     Promise.all([
         d3.json("data/map.geojson"),
         d3.csv("data/stateName.csv", function(d) { cholData.set(d.code, +d.id) }),
@@ -1034,6 +1040,7 @@ function updateBar(data, total, state){
 }
 
 function reset(){
+
     var chor = document.getElementById("choroplethChart");
     var pie = document.getElementById("pieChart");
     var scatter = document.getElementById("scatterChart");
@@ -1044,8 +1051,9 @@ function reset(){
     scatter.innerHTML = '';
     death.innerHTML = '';
     vaccine.innerHTML = '';
-
     create()
+
+
 }
 function updateText(state){
     arrayTitle =['Selangor','W.P Kuala Lumpur','Johor','Sabah','Sarawak','Negeri Sembilan','Penang','Kelantan','Perak','Kedah','Melaka','Pahang','Terengganu','W.P Putrajaya','Perlis'] 
